@@ -58,31 +58,39 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 0.8cm;
+  padding: 0.8cm 0.8cm 0.5cm 0.8cm; /* 减少底部内边距 */
 }
 
 /* 信息部分 */
 .info-section {
-  margin-bottom: 0.5cm;
+  margin-bottom: 0.3cm; /* 减小信息部分和二维码之间的间距 */
 }
 
 .info-row {
   display: flex;
-  margin-bottom: 0.5cm;
+  margin-bottom: 0.4cm; /* 略微减小行间距 */
   align-items: flex-start;
+  font-size: 0.4cm; /* 统一行的基础字体大小为0.4cm */
+  position: relative; /* 为分隔线添加定位上下文 */
+  padding-bottom: 0.2cm; /* 稍微减小底部间距 */
 }
 
-/* 编号行特殊处理 - 恢复为水平布局，但使用更小的字体 */
+/* 为每行添加底部分隔线 */
+.info-row:not(:last-child) {
+  border-bottom: 1px dashed #ccc; /* 浅色虚线分隔线 */
+}
+
+/* 编号行特殊处理 */
 .info-row:last-child {
-  margin-bottom: 0.3cm;
+  margin-bottom: 0.2cm; /* 减小最后一行的底部间距 */
+  border-bottom: none; /* 最后一行不需要分隔线 */
 }
 
 .info-label {
   width: 2cm;
   font-weight: bold;
   color: #555;
-  margin-right: 0.5cm;
-  font-size: 0.5cm; /* 标签使用0.5cm字体 */
+  margin-right: 0.25cm; /* 间隔减小一半 */
 }
 
 .info-value {
@@ -90,7 +98,6 @@ body {
   color: #222;
   text-align: left;
   word-break: break-all;
-  font-size: 0.4cm; /* 值使用0.4cm字体 */
 }
 
 /* 为编号行添加特殊样式，因为编号可能很长 */
@@ -107,13 +114,13 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 0.3cm;
-  margin-bottom: 0.5cm;
+  margin-top: 0.1cm; /* 减少顶部间距，使二维码向上移动 */
+  margin-bottom: 0.2cm; /* 减少底部间距 */
 }
 
 #qrcode {
-  width: 5cm;
-  height: 5cm;
+  width: 4.7cm; /* 略微减小二维码尺寸 */
+  height: 4.7cm;
   margin: 0 auto;
   display: flex;
   justify-content: center;
@@ -127,7 +134,7 @@ body {
 }
 
 .scan-hint {
-  margin-top: 0.3cm;
+  margin-top: 0.2cm; /* 减少提示文字的顶部间距 */
   font-size: 0.4cm;
   color: #777;
   text-align: center;
