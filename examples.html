@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>猫笼卡片示例</title>
+  <!-- 引入 QRCode.js 库，确保示例页面链接后二维码能正确生成 -->
+  <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    h1 {
+      color: #333;
+      text-align: center;
+    }
+    .example-links {
+      margin: 30px 0;
+    }
+    .example-links a {
+      display: block;
+      margin: 10px 0;
+      padding: 10px;
+      background-color: #f5f5f5;
+      border-radius: 5px;
+      text-decoration: none;
+      color: #0066cc;
+    }
+    .example-links a:hover {
+      background-color: #e5e5e5;
+    }
+    .example-info {
+      font-size: 14px;
+      color: #666;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>猫笼卡片示例</h1>
+  
+  <p>点击下面的链接查看不同编号的猫笼卡片:</p>
+  
+  <div class="example-links">
+    <a href="index.html">默认卡片</a>
+    <div class="example-info">使用默认编号: 猫笼 A123, 房间 R01, 仓库 W05</div>
+    
+    <a href="index.html?cage=B789&room=R03&warehouse=W08">示例 1</a>
+    <div class="example-info">猫笼 B789, 房间 R03, 仓库 W08</div>
+    
+    <a href="index.html?cage=C456&room=R10&warehouse=W02">示例 2</a>
+    <div class="example-info">猫笼 C456, 房间 R10, 仓库 W02</div>
+    
+    <a href="index.html?cage=D234&room=R05&warehouse=W01">示例 3</a>
+    <div class="example-info">猫笼 D234, 房间 R05, 仓库 W01</div>
+  </div>
+  
+  <p>您也可以通过修改URL参数来自定义编号:</p>
+  <code>index.html?cage=编号&room=房间号&warehouse=仓库号</code>
+</body>
+</html>

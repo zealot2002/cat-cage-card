@@ -98,6 +98,15 @@ body {
   width: 5cm;
   height: 5cm;
   margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 确保QRCode库生成的图像居中显示 */
+#qrcode img {
+  display: block;
+  margin: 0 auto;
 }
 
 .scan-hint {

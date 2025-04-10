@@ -40,15 +40,13 @@ function generateQRCode(text) {
   qrcodeElement.innerHTML = '';
   
   // 使用QRCode.js库生成二维码
-  QRCode.toCanvas(qrcodeElement, text, {
+  new QRCode(qrcodeElement, {
+    text: text,
     width: 188, // 约等于5cm的像素大小（以96dpi计算）
-    margin: 1,
-    color: {
-      dark: '#000',
-      light: '#fff'
-    }
-  }, function(error) {
-    if (error) console.error(error);
+    height: 188,
+    colorDark: "#000000",
+    colorLight: "#ffffff",
+    correctLevel: QRCode.CorrectLevel.H
   });
 }
 
