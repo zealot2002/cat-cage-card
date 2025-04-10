@@ -1,0 +1,132 @@
+/* 全局样式重置 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+  background-color: #f5f5f5;
+}
+
+/* 卡片容器 */
+.card-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 猫笼卡片，设置为固定尺寸 10.5cm × 14.5cm */
+.cat-card {
+  width: 10.5cm;
+  height: 14.5cm;
+  background: white;
+  border-radius: 0.5cm;
+  box-shadow: 0 0.2cm 0.5cm rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  border: 1px solid #ddd;
+}
+
+/* 卡片头部 */
+.card-header {
+  display: flex;
+  align-items: center;
+  padding: 0.5cm;
+  background-color: #f8f8f8;
+  border-bottom: 1px solid #eee;
+}
+
+.paw-icon {
+  width: 1.2cm;
+  height: 1.2cm;
+  margin-right: 0.5cm;
+}
+
+.card-header h1 {
+  font-size: 0.8cm;
+  color: #333;
+  font-weight: bold;
+}
+
+/* 卡片内容区域 */
+.card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 0.8cm;
+}
+
+/* 信息部分 */
+.info-section {
+  margin-bottom: 1cm;
+}
+
+.info-row {
+  display: flex;
+  margin-bottom: 0.5cm;
+  font-size: 0.5cm;
+}
+
+.info-label {
+  width: 3.5cm;
+  font-weight: bold;
+  color: #555;
+}
+
+.info-value {
+  flex: 1;
+  color: #222;
+}
+
+/* 二维码部分 */
+.qrcode-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: auto;
+}
+
+#qrcode {
+  width: 5cm;
+  height: 5cm;
+  margin: 0 auto;
+}
+
+.scan-hint {
+  margin-top: 0.5cm;
+  font-size: 0.4cm;
+  color: #777;
+  text-align: center;
+}
+
+/* 打印样式 */
+@media print {
+  body {
+    background: none;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .card-container {
+    width: 10.5cm;
+    height: 14.5cm;
+  }
+  
+  .cat-card {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+}
+
+@page {
+  size: 10.5cm 14.5cm;
+  margin: 0;
+} 
