@@ -73,14 +73,9 @@ body {
   align-items: flex-start;
 }
 
-/* 编号行特殊处理 */
+/* 编号行特殊处理 - 恢复为水平布局，但使用更小的字体 */
 .info-row:last-child {
   margin-bottom: 0.3cm;
-  flex-direction: column;
-}
-
-.info-row:last-child .info-label {
-  margin-bottom: 0.2cm;
 }
 
 .info-label {
@@ -99,13 +94,12 @@ body {
 
 /* 为编号行添加特殊样式，因为编号可能很长 */
 #full-id {
-  word-break: break-all;
   font-family: monospace;
-  font-size: 0.4cm;
-  letter-spacing: -0.01cm;
-  width: 100%;
-  display: inline-block;
-  line-height: 1.2;
+  font-size: 0.34cm;
+  letter-spacing: -0.02cm;
+  white-space: nowrap; /* 不换行 */
+  overflow: hidden;
+  text-overflow: ellipsis; /* 如果超出范围，显示省略号 */
 }
 
 /* 二维码部分 */
