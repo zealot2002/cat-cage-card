@@ -69,7 +69,6 @@ body {
 .info-row {
   display: flex;
   margin-bottom: 0.5cm;
-  font-size: 0.5cm;
   align-items: flex-start;
 }
 
@@ -83,6 +82,7 @@ body {
   font-weight: bold;
   color: #555;
   margin-right: 0.5cm;
+  font-size: 0.5cm; /* 标签使用0.5cm字体 */
 }
 
 .info-value {
@@ -90,12 +90,12 @@ body {
   color: #222;
   text-align: left;
   word-break: break-all;
+  font-size: 0.4cm; /* 值使用0.4cm字体 */
 }
 
 /* 为编号行添加特殊样式，因为编号可能很长 */
 #full-id {
   font-family: monospace;
-  font-size: 0.34cm;
   letter-spacing: -0.02cm;
   white-space: nowrap; /* 不换行 */
   overflow: hidden;
