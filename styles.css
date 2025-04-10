@@ -19,6 +19,8 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 10.5cm;
+  height: 14.5cm;
 }
 
 /* 猫笼卡片，设置为固定尺寸 10.5cm × 14.5cm */
@@ -62,11 +64,12 @@ body {
   display: flex;
   flex-direction: column;
   padding: 0.8cm;
+  justify-content: space-between;
 }
 
 /* 信息部分 */
 .info-section {
-  margin-bottom: 1cm;
+  margin-bottom: 0.5cm;
 }
 
 .info-row {
@@ -102,7 +105,8 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: auto;
+  margin-top: 0.5cm;
+  margin-bottom: 0.5cm;
 }
 
 #qrcode {
@@ -121,7 +125,7 @@ body {
 }
 
 .scan-hint {
-  margin-top: 0.5cm;
+  margin-top: 0.3cm;
   font-size: 0.4cm;
   color: #777;
   text-align: center;
