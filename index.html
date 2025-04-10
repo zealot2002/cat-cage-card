@@ -1,49 +1,154 @@
 <!DOCTYPE html>
 <html lang="zh">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>宠无忧云仓</title>
-  <link rel="stylesheet" href="styles.css">
-  <!-- 引入 QRCode.js 库 -->
-  <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>宠无忧云仓</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- 引入 QRCode.js 库 -->
+    <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
+    <!-- 引入 html2canvas 库用于将HTML转换为Canvas并保存为图片 -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <style>
+        .save-button-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px auto;
+            max-width: 10.5cm;
+        }
+        
+        .save-button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .save-button:hover {
+            background-color: #45a049;
+        }
+
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        /* 内联SVG图标样式 */
+        .paw-svg-icon {
+            width: 1.2cm;
+            height: 1.2cm;
+            margin-right: 0.5cm;
+            fill: #555;
+        }
+    </style>
 </head>
+
 <body>
-  <div class="card-container">
-    <div class="cat-card">
-      <div class="card-header">
-        <img src="paw-icon.svg" alt="猫爪图标" class="paw-icon">
-        <h1>宠无忧云仓</h1>
-      </div>
-      
-      <div class="card-content">
-        <div class="info-section">
-          <div class="info-row">
-            <div class="info-label">猫笼:</div>
-            <div class="info-value" id="cage-number">C003</div>
-          </div>
-          <div class="info-row">
-            <div class="info-label">房间:</div>
-            <div class="info-value" id="room-number">R0401</div>
-          </div>
-          <div class="info-row">
-            <div class="info-label">仓库:</div>
-            <div class="info-value" id="warehouse-number">W20004003000001</div>
-          </div>
-          <div class="info-row">
-            <div class="info-label">编号:</div>
-            <div class="info-value" id="full-id">C003R0401W20004003000001</div>
-          </div>
+    <div class="main-container">
+        <div class="card-container" id="cardToSave">
+            <div class="cat-card">
+                <div class="card-header">
+                    <!-- 使用内联SVG代替外部SVG文件，避免跨域问题 -->
+                    <svg class="paw-svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                        <path d="M226.5 92.9c14.3 42.9-.3 86.2-32.6 96.8s-70.1-15.6-84.4-58.5.3-86.2 32.6-96.8 70.1 15.6 84.4 58.5zm22.8 60.7C254.1 135.4 246.3 96 212.3 81.8s-67.2 8.8-72.1 26.9 6.1 40.4 40.1 54.6 67.2-8.8 72.1-26.9z"/>
+                        <path d="M100.4 198.6c18.2 5.4 29.6 24.7 28.7 48.7s-13.7 41-31.8 44.6-36.3-8.2-46.4-27.2 1.7-64.4 49.5-66.1z"/>
+                        <path d="M69.9 401.1c-6.8-24 10.9-53.1 39.6-65.2s57.1-1.2 65.4 25.3-5.3 60.2-35.1 73.2-63 11.1-69.9-33.3z"/>
+                        <path d="M379.9 93.1c30.8 19-18.3 103.9-36.9 93.1-18.6-10.8-7.8-76.3 36.9-93.1z"/>
+                        <path d="M279.9 404.5c-24-6.8-42.7-22.3-39.1-57.9 3.6-28.6 27.5-44.6 51.6-36.4s27.3 47.8 14.4 76.7-3.3 24.7-26.9 17.6z"/>
+                        <path d="M411.8 200.5c30.8 4.8 54-7.9 61.9-37.2 3.6-28.6-15.2-55.8-43.5-61.1-28.3-5.2-59.6 4.3-65.4 32.9-5.6 28.6 16.6 61 47 65.4z"/>
+                    </svg>
+                    <h1>宠无忧云仓</h1>
+                </div>
+                <div class="card-content">
+                    <div class="info-section">
+                        <div class="info-row">
+                            <div class="info-label">编号:</div>
+                            <div class="info-value" id="full-id">C003R0401W20004003000001</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">仓库:</div>
+                            <div class="info-value" id="warehouse-number">W20004003000001</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">房间:</div>
+                            <div class="info-value" id="room-number">R0401</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">猫笼:</div>
+                            <div class="info-value" id="cage-number">C003</div>
+                        </div>
+                    </div>
+                    <div class="qrcode-section">
+                        <div id="qrcode"></div>
+                        <p class="scan-hint">扫描二维码获取猫笼信息</p>
+                    </div>
+                </div>
+            </div>
         </div>
         
-        <div class="qrcode-section">
-          <div id="qrcode"></div>
-          <p class="scan-hint">扫描二维码获取猫笼信息</p>
+        <div class="save-button-container">
+            <button class="save-button" id="saveAsJpg">保存卡片为JPG</button>
         </div>
-      </div>
     </div>
-  </div>
-  
-  <script src="script.js"></script>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 给保存按钮添加点击事件
+            document.getElementById('saveAsJpg').addEventListener('click', function() {
+                // 等待二维码渲染完成
+                setTimeout(function() {
+                    // 获取要转换的DOM元素
+                    const element = document.getElementById('cardToSave');
+                    
+                    // 处理html2canvas的选项
+                    const options = {
+                        scale: 2, // 提高图像质量
+                        useCORS: true, // 尝试使用CORS
+                        allowTaint: true, // 允许画布被"污染"
+                        backgroundColor: 'white',
+                        logging: false // 关闭日志
+                    };
+                    
+                    // 执行转换
+                    html2canvas(element, options)
+                        .then(function(canvas) {
+                            try {
+                                // 获取完整编号作为文件名
+                                const fullId = document.getElementById('full-id').textContent.trim();
+                                
+                                // 尝试将canvas转为jpeg数据URL
+                                const imgData = canvas.toDataURL('image/jpeg', 0.9);
+                                
+                                // 创建下载链接
+                                const link = document.createElement('a');
+                                link.download = fullId + '.jpg'; // 使用编号命名文件
+                                link.href = imgData;
+                                link.click();
+                            } catch (e) {
+                                console.error('转换为图片时出错:', e);
+                                alert('无法导出图片，请尝试使用浏览器的截图功能。错误信息: ' + e.message);
+                            }
+                        })
+                        .catch(function(error) {
+                            console.error('生成画布时出错:', error);
+                            alert('无法生成图片，请尝试使用浏览器的截图功能。错误信息: ' + error.message);
+                        });
+                }, 500);
+            });
+        });
+    </script>
 </body>
-</html> 
+
+</html>
