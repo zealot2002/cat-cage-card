@@ -6,9 +6,9 @@ document.addEventListener('DOMContentLoaded', function() {
   const fullId = document.getElementById('full-id');
   
   // 默认编号
-  const defaultCage = 'A123';
-  const defaultRoom = 'R01';
-  const defaultWarehouse = 'W05';
+  const defaultCage = 'C003';
+  const defaultRoom = 'R0401';
+  const defaultWarehouse = 'W20004003000001';
   
   // 如果需要从URL参数中读取编号
   const urlParams = new URLSearchParams(window.location.search);
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
   warehouseNumber.textContent = warehouseParam;
   
   // 生成完整编号
-  const completeId = `${warehouseParam}-${roomParam}-${cageParam}`;
+  const completeId = `${cageParam}${roomParam}${warehouseParam}`;
   fullId.textContent = completeId;
   
   // 生成二维码

@@ -73,17 +73,28 @@ body {
   display: flex;
   margin-bottom: 0.5cm;
   font-size: 0.5cm;
+  align-items: flex-start;
 }
 
 .info-label {
-  width: 3.5cm;
+  width: 2cm;
   font-weight: bold;
   color: #555;
+  margin-right: 0.5cm;
 }
 
 .info-value {
   flex: 1;
   color: #222;
+  text-align: left;
+  word-break: break-all;
+}
+
+/* 为编号行添加特殊样式，因为编号可能很长 */
+#full-id {
+  word-break: break-all;
+  font-family: monospace;
+  font-size: 0.45cm;
 }
 
 /* 二维码部分 */
