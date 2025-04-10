@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>宠无忧云仓 - 批量生成卡片</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- 引入 QRCode.js 库 -->
+    <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
+    <!-- 引入 html2canvas 库用于将HTML转换为Canvas并保存为图片 -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <!-- 引入 JSZip 库用于创建ZIP压缩包 -->
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <!-- 引入 FileSaver.js 用于保存文件 -->
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .control-panel {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 800px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -10px;
+        }
+        
+        .form-col {
+            flex: 1;
+            padding: 0 10px;
+            min-width: 200px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        .button-group {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 10px;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .progress-container {
+            width: 100%;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 24px;
+            background-color: #4CAF50;
+            text-align: center;
+            line-height: 24px;
+            color: white;
+            transition: width 0.3s;
+            width: 0%;
+        }
+        
+        .status {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .preview-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        /* 修改卡片样式以适应预览 */
+        .preview-card {
+            transform: scale(0.5);
+            transform-origin: top center;
+            margin: -3.625cm 0;  /* 补偿缩放导致的空间变化 */
+        }
+        
+        .preview-box {
+            width: 5.25cm;  /* 10.5cm 的一半 */
+            height: 7.25cm;  /* 14.5cm 的一半 */
+            overflow: hidden;
+            border: 1px dashed #ccc;
+            margin: 0 auto;
+        }
+        
+        /* SVG图标样式 */
+        .paw-svg-icon {
+            width: 1.2cm;
+            height: 1.2cm;
+            margin-right: 0.5cm;
+            fill: #555;
+        }
+        
+        /* 隐藏辅助元素 */
+        .hidden-card {
+            position: absolute;
+            left: -9999px;
+            top: -9999px;
+        }
+        
+        .help-text {
+            font-size: 13px;
+            color: #666;
+            margin-top: 4px;
+        }
+        
+        .alert {
+            padding: 10px 15px;
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>宠无忧云仓 - 批量生成卡片</h1>
+        
+        <div class="control-panel">
+            <div class="alert" id="errorAlert"></div>
+            
+            <div class="form-group">
+                <label>仓库编号前缀</label>
+                <input type="text" id="warehousePrefix" value="W2000" placeholder="输入仓库编号前缀">
+                <div class="help-text">例如: W2000，所有卡片将使用此前缀</div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-col">
+                    <div class="form-group">
+                        <label>房间编号格式</label>
+                        <select id="roomFormat">
+                            <option value="R{0}">R格式 (R01, R02...)</option>
+                            <option value="{0}">纯数字 (01, 02...)</option>
+                            <option value="Room{0}">Room格式 (Room01, Room02...)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-col">
+                    <div class="form-group">
+                        <label>房间编号范围</label>
+                        <div class="form-row">
+                            <div class="form-col">
+                                <input type="number" id="roomStart" value="1" min="1" placeholder="起始编号">
+                            </div>
+                            <div class="form-col">
+                                <input type="number" id="roomEnd" value="6" min="1" placeholder="结束编号">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-col">
+                    <div class="form-group">
+                        <label>猫笼编号格式</label>
+                        <select id="cageFormat">
+                            <option value="C{0}">C格式 (C001, C002...)</option>
+                            <option value="{0}">纯数字 (001, 002...)</option>
+                            <option value="Cage{0}">Cage格式 (Cage001, Cage002...)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-col">
+                    <div class="form-group">
+                        <label>每个房间的猫笼数量</label>
+                        <input type="number" id="cageCount" value="20" min="1" max="100" placeholder="每个房间的猫笼数量">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>猫笼编号位数</label>
+                <select id="cageDigits">
+                    <option value="3">3位数 (001, 002, ..., 999)</option>
+                    <option value="2">2位数 (01, 02, ..., 99)</option>
+                    <option value="4">4位数 (0001, 0002, ..., 9999)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>编号组合规则</label>
+                <select id="idCombination">
+                    <option value="cage-room-warehouse">猫笼 + 房间 + 仓库</option>
+                    <option value="room-cage-warehouse">房间 + 猫笼 + 仓库</option>
+                    <option value="warehouse-room-cage">仓库 + 房间 + 猫笼</option>
+                </select>
+                <div class="help-text">定义完整编号的组合方式</div>
+            </div>
+            
+            <div class="button-group">
+                <button id="previewButton">生成预览</button>
+                <button id="generateButton">批量生成JPG</button>
+            </div>
+            
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar">
+                    <div class="progress" id="progressBar">0%</div>
+                </div>
+                <div class="status" id="statusText">准备中...</div>
+            </div>
+        </div>
+        
+        <div class="preview-container">
+            <div class="preview-box">
+                <div class="preview-card">
+                    <div class="card-container" id="previewCard">
+                        <div class="cat-card">
+                            <div class="card-header">
+                                <svg class="paw-svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                                    <path d="M226.5 92.9c14.3 42.9-.3 86.2-32.6 96.8s-70.1-15.6-84.4-58.5.3-86.2 32.6-96.8 70.1 15.6 84.4 58.5zm22.8 60.7C254.1 135.4 246.3 96 212.3 81.8s-67.2 8.8-72.1 26.9 6.1 40.4 40.1 54.6 67.2-8.8 72.1-26.9z"/>
+                                    <path d="M100.4 198.6c18.2 5.4 29.6 24.7 28.7 48.7s-13.7 41-31.8 44.6-36.3-8.2-46.4-27.2 1.7-64.4 49.5-66.1z"/>
+                                    <path d="M69.9 401.1c-6.8-24 10.9-53.1 39.6-65.2s57.1-1.2 65.4 25.3-5.3 60.2-35.1 73.2-63 11.1-69.9-33.3z"/>
+                                    <path d="M379.9 93.1c30.8 19-18.3 103.9-36.9 93.1-18.6-10.8-7.8-76.3 36.9-93.1z"/>
+                                    <path d="M279.9 404.5c-24-6.8-42.7-22.3-39.1-57.9 3.6-28.6 27.5-44.6 51.6-36.4s27.3 47.8 14.4 76.7-3.3 24.7-26.9 17.6z"/>
+                                    <path d="M411.8 200.5c30.8 4.8 54-7.9 61.9-37.2 3.6-28.6-15.2-55.8-43.5-61.1-28.3-5.2-59.6 4.3-65.4 32.9-5.6 28.6 16.6 61 47 65.4z"/>
+                                </svg>
+                                <h1>宠无忧云仓</h1>
+                            </div>
+                            <div class="card-content">
+                                <div class="info-section">
+                                    <div class="info-row">
+                                        <div class="info-label">编号:</div>
+                                        <div class="info-value" id="preview-full-id">C001R01W2000</div>
+                                    </div>
+                                    <div class="info-row">
+                                        <div class="info-label">仓库:</div>
+                                        <div class="info-value" id="preview-warehouse-number">W2000</div>
+                                    </div>
+                                    <div class="info-row">
+                                        <div class="info-label">房间:</div>
+                                        <div class="info-value" id="preview-room-number">R01</div>
+                                    </div>
+                                    <div class="info-row">
+                                        <div class="info-label">猫笼:</div>
+                                        <div class="info-value" id="preview-cage-number">C001</div>
+                                    </div>
+                                </div>
+                                <div class="qrcode-section">
+                                    <div id="preview-qrcode"></div>
+                                    <p class="scan-hint">扫描二维码获取猫笼信息</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 用于生成实际卡片的隐藏元素 -->
+        <div class="hidden-card">
+            <div class="card-container" id="generatorCard">
+                <div class="cat-card">
+                    <div class="card-header">
+                        <svg class="paw-svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                            <path d="M226.5 92.9c14.3 42.9-.3 86.2-32.6 96.8s-70.1-15.6-84.4-58.5.3-86.2 32.6-96.8 70.1 15.6 84.4 58.5zm22.8 60.7C254.1 135.4 246.3 96 212.3 81.8s-67.2 8.8-72.1 26.9 6.1 40.4 40.1 54.6 67.2-8.8 72.1-26.9z"/>
+                            <path d="M100.4 198.6c18.2 5.4 29.6 24.7 28.7 48.7s-13.7 41-31.8 44.6-36.3-8.2-46.4-27.2 1.7-64.4 49.5-66.1z"/>
+                            <path d="M69.9 401.1c-6.8-24 10.9-53.1 39.6-65.2s57.1-1.2 65.4 25.3-5.3 60.2-35.1 73.2-63 11.1-69.9-33.3z"/>
+                            <path d="M379.9 93.1c30.8 19-18.3 103.9-36.9 93.1-18.6-10.8-7.8-76.3 36.9-93.1z"/>
+                            <path d="M279.9 404.5c-24-6.8-42.7-22.3-39.1-57.9 3.6-28.6 27.5-44.6 51.6-36.4s27.3 47.8 14.4 76.7-3.3 24.7-26.9 17.6z"/>
+                            <path d="M411.8 200.5c30.8 4.8 54-7.9 61.9-37.2 3.6-28.6-15.2-55.8-43.5-61.1-28.3-5.2-59.6 4.3-65.4 32.9-5.6 28.6 16.6 61 47 65.4z"/>
+                        </svg>
+                        <h1>宠无忧云仓</h1>
+                    </div>
+                    <div class="card-content">
+                        <div class="info-section">
+                            <div class="info-row">
+                                <div class="info-label">编号:</div>
+                                <div class="info-value" id="generator-full-id"></div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">仓库:</div>
+                                <div class="info-value" id="generator-warehouse-number"></div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">房间:</div>
+                                <div class="info-value" id="generator-room-number"></div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">猫笼:</div>
+                                <div class="info-value" id="generator-cage-number"></div>
+                            </div>
+                        </div>
+                        <div class="qrcode-section">
+                            <div id="generator-qrcode"></div>
+                            <p class="scan-hint">扫描二维码获取猫笼信息</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 变量定义
+            let previewQrcode = null;
+            let generatorQrcode = null;
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+            const statusText = document.getElementById('statusText');
+            const errorAlert = document.getElementById('errorAlert');
+            
+            // 初始化预览二维码
+            previewQrcode = new QRCode(document.getElementById('preview-qrcode'), {
+                text: 'C001R01W2000',
+                width: 188,
+                height: 188,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            
+            // 初始化生成器二维码
+            generatorQrcode = new QRCode(document.getElementById('generator-qrcode'), {
+                text: ' ',  // 初始为空白
+                width: 188,
+                height: 188,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            
+            // 工具函数 - 创建指定数字格式
+            function formatNumber(num, digits) {
+                return num.toString().padStart(digits, '0');
+            }
+            
+            // 工具函数 - 格式化ID
+            function formatId(format, number, digits) {
+                const formattedNumber = formatNumber(number, digits);
+                return format.replace('{0}', formattedNumber);
+            }
+            
+            // 工具函数 - 生成完整编号
+            function generateFullId(cage, room, warehouse, combinationRule) {
+                switch(combinationRule) {
+                    case 'cage-room-warehouse':
+                        return cage + room + warehouse;
+                    case 'room-cage-warehouse':
+                        return room + cage + warehouse;
+                    case 'warehouse-room-cage':
+                        return warehouse + room + cage;
+                    default:
+                        return cage + room + warehouse;
+                }
+            }
+            
+            // 工具函数 - 验证输入
+            function validateInputs() {
+                const roomStart = parseInt(document.getElementById('roomStart').value);
+                const roomEnd = parseInt(document.getElementById('roomEnd').value);
+                const cageCount = parseInt(document.getElementById('cageCount').value);
+                
+                if (roomStart > roomEnd) {
+                    showError('房间起始编号不能大于结束编号');
+                    return false;
+                }
+                
+                if (cageCount <= 0 || cageCount > 100) {
+                    showError('每个房间的猫笼数量应在1到100之间');
+                    return false;
+                }
+                
+                const totalCards = (roomEnd - roomStart + 1) * cageCount;
+                if (totalCards > 200) {
+                    showError(`您将生成${totalCards}张卡片，数量过多可能导致浏览器性能问题，请减少数量`);
+                    return false;
+                }
+                
+                hideError();
+                return true;
+            }
+            
+            // 工具函数 - 显示错误
+            function showError(message) {
+                errorAlert.textContent = message;
+                errorAlert.style.display = 'block';
+            }
+            
+            // 工具函数 - 隐藏错误
+            function hideError() {
+                errorAlert.style.display = 'none';
+            }
+            
+            // 更新预览
+            function updatePreview() {
+                if (!validateInputs()) return;
+                
+                const warehousePrefix = document.getElementById('warehousePrefix').value || 'W2000';
+                const roomFormat = document.getElementById('roomFormat').value;
+                const cageFormat = document.getElementById('cageFormat').value;
+                const cageDigits = parseInt(document.getElementById('cageDigits').value);
+                const roomStart = parseInt(document.getElementById('roomStart').value);
+                const idCombination = document.getElementById('idCombination').value;
+                
+                // 格式化房间和猫笼编号
+                const roomNumber = formatId(roomFormat, roomStart, 2);
+                const cageNumber = formatId(cageFormat, 1, cageDigits);
+                
+                // 生成完整编号
+                const fullId = generateFullId(cageNumber, roomNumber, warehousePrefix, idCombination);
+                
+                // 更新预览元素
+                document.getElementById('preview-cage-number').textContent = cageNumber;
+                document.getElementById('preview-room-number').textContent = roomNumber;
+                document.getElementById('preview-warehouse-number').textContent = warehousePrefix;
+                document.getElementById('preview-full-id').textContent = fullId;
+                
+                // 更新二维码
+                previewQrcode.makeCode(fullId);
+            }
+            
+            // 预览按钮事件
+            document.getElementById('previewButton').addEventListener('click', updatePreview);
+            
+            // 生成按钮事件
+            document.getElementById('generateButton').addEventListener('click', async function() {
+                if (!validateInputs()) return;
+                
+                // 禁用按钮
+                const generateButton = document.getElementById('generateButton');
+                const previewButton = document.getElementById('previewButton');
+                generateButton.disabled = true;
+                previewButton.disabled = true;
+                
+                // 显示进度条
+                progressContainer.style.display = 'block';
+                progressBar.style.width = '0%';
+                progressBar.textContent = '0%';
+                statusText.textContent = '准备生成...';
+                
+                try {
+                    // 获取参数
+                    const warehousePrefix = document.getElementById('warehousePrefix').value || 'W2000';
+                    const roomFormat = document.getElementById('roomFormat').value;
+                    const cageFormat = document.getElementById('cageFormat').value;
+                    const cageDigits = parseInt(document.getElementById('cageDigits').value);
+                    const roomStart = parseInt(document.getElementById('roomStart').value);
+                    const roomEnd = parseInt(document.getElementById('roomEnd').value);
+                    const cageCount = parseInt(document.getElementById('cageCount').value);
+                    const idCombination = document.getElementById('idCombination').value;
+                    
+                    // 计算总卡片数
+                    const totalCards = (roomEnd - roomStart + 1) * cageCount;
+                    
+                    // 创建 zip 对象
+                    const zip = new JSZip();
+                    let processedCount = 0;
+                    
+                    // 设置渲染选项
+                    const renderOptions = {
+                        scale: 2,
+                        useCORS: true,
+                        allowTaint: true,
+                        backgroundColor: 'white',
+                        logging: false
+                    };
+                    
+                    // 准备渲染元素
+                    const cardElement = document.getElementById('generatorCard');
+                    const generatorFullId = document.getElementById('generator-full-id');
+                    const generatorWarehouse = document.getElementById('generator-warehouse-number');
+                    const generatorRoom = document.getElementById('generator-room-number');
+                    const generatorCage = document.getElementById('generator-cage-number');
+                    
+                    // 批量生成卡片
+                    for (let r = roomStart; r <= roomEnd; r++) {
+                        const roomNumber = formatId(roomFormat, r, 2);
+                        
+                        for (let c = 1; c <= cageCount; c++) {
+                            // 更新状态
+                            const progress = Math.floor((processedCount / totalCards) * 100);
+                            progressBar.style.width = progress + '%';
+                            progressBar.textContent = progress + '%';
+                            statusText.textContent = `正在生成第 ${processedCount + 1} 张，共 ${totalCards} 张`;
+                            
+                            // 允许UI更新
+                            await new Promise(resolve => setTimeout(resolve, 0));
+                            
+                            // 格式化编号
+                            const cageNumber = formatId(cageFormat, c, cageDigits);
+                            const fullId = generateFullId(cageNumber, roomNumber, warehousePrefix, idCombination);
+                            
+                            // 更新卡片内容
+                            generatorFullId.textContent = fullId;
+                            generatorWarehouse.textContent = warehousePrefix;
+                            generatorRoom.textContent = roomNumber;
+                            generatorCage.textContent = cageNumber;
+                            
+                            // 更新二维码
+                            generatorQrcode.clear();
+                            generatorQrcode.makeCode(fullId);
+                            
+                            // 等待二维码渲染完成
+                            await new Promise(resolve => setTimeout(resolve, 100));
+                            
+                            try {
+                                // 渲染为图片
+                                const canvas = await html2canvas(cardElement, renderOptions);
+                                const imgData = canvas.toDataURL('image/jpeg', 0.9);
+                                
+                                // 将 base64 图片添加到 zip
+                                const base64Data = imgData.split(',')[1];
+                                zip.file(`${fullId}.jpg`, base64Data, {base64: true});
+                                
+                                processedCount++;
+                            } catch (e) {
+                                console.error('渲染卡片出错:', e);
+                                statusText.textContent = `渲染第 ${processedCount + 1} 张卡片时出错: ${e.message}`;
+                            }
+                        }
+                    }
+                    
+                    // 完成状态更新
+                    progressBar.style.width = '100%';
+                    progressBar.textContent = '100%';
+                    statusText.textContent = '正在生成压缩包...';
+                    
+                    // 生成ZIP文件
+                    const content = await zip.generateAsync({
+                        type: 'blob',
+                        compression: 'DEFLATE',
+                        compressionOptions: {
+                            level: 6
+                        }
+                    }, function(metadata) {
+                        statusText.textContent = `压缩中: ${metadata.percent.toFixed(1)}%`;
+                    });
+                    
+                    // 下载ZIP文件
+                    saveAs(content, '宠无忧猫笼卡片.zip');
+                    
+                    statusText.textContent = `成功生成 ${processedCount} 张卡片，已打包为ZIP文件`;
+                    
+                } catch (error) {
+                    console.error('生成卡片出错:', error);
+                    statusText.textContent = `生成出错: ${error.message}`;
+                } finally {
+                    // 恢复按钮状态
+                    generateButton.disabled = false;
+                    previewButton.disabled = false;
+                }
+            });
+            
+            // 初始化预览
+            updatePreview();
+        });
+    </script>
+</body>
+
+</html> 
